@@ -45,7 +45,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
   describe 'posting a single key', ->
     beforeEach (done) ->
-      @store.remove 'some/path', done
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
 
     beforeEach (done) ->
       options =
@@ -75,12 +75,44 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
         done()
       return # promises
 
-  describe 'posting two keys', ->
+  describe 'caching the whole device', ->
     beforeEach (done) ->
-      @store.remove 'some/path', done
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
 
     beforeEach (done) ->
-      @store.remove 'another/path', done
+      options =
+        headers:
+          'X-MESHBLU-UUID': '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1'
+        uri: '/cache?key=_'
+        baseUrl: "http://localhost:#{@serverPort}"
+        json:
+          some:
+            path: 'foo'
+        httpSignature:
+          keyId: 'meshblu-webhook-key'
+          key: @privateKey
+          headers: [ 'date', 'X-MESHBLU-UUID' ]
+
+      request.post options, (error, @response, @body) =>
+        done error
+
+    it 'should return a 201', ->
+      expect(@response.statusCode).to.equal 201
+
+    it 'should create a cache file', (done) ->
+      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_'
+      streamToString rs, (error, data) =>
+        return done error if error?
+        expect(JSON.parse data).to.deep.equal some: path: 'foo'
+        done()
+      return # promises
+
+  describe 'posting two keys', ->
+    beforeEach (done) ->
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
+
+    beforeEach (done) ->
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path', done
 
     beforeEach (done) ->
       options =

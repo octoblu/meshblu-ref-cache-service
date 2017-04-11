@@ -24,6 +24,7 @@ class MeshbluRefCacheService
     async.each key, async.apply(@_saveBlob, uuid, data), callback
 
   get: ({ uuid, path }, callback) =>
+    path = '/_' if _.isEmpty path
     filename = "#{uuid}#{path}"
     callback null, @store.createReadStream key: filename
 
@@ -33,7 +34,10 @@ class MeshbluRefCacheService
     # clear highlight parsing error /' # WONTFIX
     filename = "#{uuid}/#{fileKey}"
 
-    partialData = _.get data, key
+    if key == '_'
+      partialData = data
+    else
+      partialData = _.get data, key
     return callback() unless partialData?
     ws = @store.createWriteStream key: filename, callback
     stringToStream(JSON.stringify(partialData)).pipe ws

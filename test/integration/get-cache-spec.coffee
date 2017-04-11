@@ -45,7 +45,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
   describe 'posting a single key', ->
     beforeEach (done) ->
-      @store.remove 'some/path', done
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
 
     beforeEach (done) ->
       uploadOptions =
@@ -76,3 +76,37 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
     it 'should get the cache file', ->
       expect(@body).to.equal 'foo'
+
+  describe.only 'getting the whole device', ->
+    beforeEach (done) ->
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
+
+    beforeEach (done) ->
+      uploadOptions =
+        headers:
+          'X-MESHBLU-UUID': '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1'
+        uri: '/cache?key=_'
+        baseUrl: "http://localhost:#{@serverPort}"
+        json:
+          some:
+            path: 'foo'
+        httpSignature:
+          keyId: 'meshblu-webhook-key'
+          key: @privateKey
+          headers: [ 'date', 'X-MESHBLU-UUID' ]
+
+      options =
+        baseUrl: "http://localhost:#{@serverPort}"
+        uri: '/cache/87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1'
+        json: true
+
+      request.post uploadOptions, (error, uploadResponse, uploadBody) =>
+        done error if error?
+        request.get options, (error, @response, @body) =>
+          done error
+
+    it 'should return a 200', ->
+      expect(@response.statusCode).to.equal 200
+
+    it 'should get the cache file', ->
+      expect(@body).to.deep.equal some: path: 'foo'

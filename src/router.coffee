@@ -9,7 +9,7 @@ class Router
   route: (app) =>
     meshbluRefCacheController = new MeshbluRefCacheController { @meshbluRefCacheService }
 
-    app.get '/cache/:uuid/*', meshbluRefCacheController.get
+    app.get '/cache/:uuid*', meshbluRefCacheController.get
 
     # order is important here
     app.use httpSignature.verify pub: @publicKey
