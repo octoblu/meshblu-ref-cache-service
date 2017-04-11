@@ -23,6 +23,10 @@ class MeshbluRefCacheService
   create: ({ uuid, key, data }, callback) =>
     async.each key, async.apply(@_saveBlob, uuid, data), callback
 
+  get: ({ uuid, path }, callback) =>
+    filename = "#{uuid}#{path}"
+    callback null, @store.createReadStream key: filename
+
   _saveBlob: (uuid, data, key, callback) =>
     debug { data, key }
     fileKey = key.replace /\./, '/'

@@ -13,4 +13,10 @@ class MeshbluRefCacheController
       return response.sendError(error) if error?
       response.status(201).end()
 
+  get: (request, response) =>
+    { uuid } = request.params
+    path = request.path.replace("/cache/#{uuid}", '')
+    @meshbluRefCacheService.get { uuid, path }, (error, stream) =>
+      stream.pipe(response)
+
 module.exports = MeshbluRefCacheController

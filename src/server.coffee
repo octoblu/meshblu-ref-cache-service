@@ -2,7 +2,6 @@ enableDestroy          = require 'server-destroy'
 octobluExpress         = require 'express-octoblu'
 Router                 = require './router'
 MeshbluRefCacheService = require './services/meshblu-ref-cache-service'
-httpSignature          = require '@octoblu/connect-http-signature'
 
 class Server
   constructor: (options) ->
@@ -23,11 +22,8 @@ class Server
   run: (callback) =>
     app = octobluExpress({ @logFn, @disableLogging })
 
-    app.use httpSignature.verify pub: @publicKey
-    app.use httpSignature.gateway()
-
     meshbluRefCacheService = new MeshbluRefCacheService { @s3AccessKey, @s3SecretKey, @s3BucketName }
-    router = new Router { meshbluRefCacheService }
+    router = new Router { meshbluRefCacheService, @publicKey }
 
     router.route app
 
