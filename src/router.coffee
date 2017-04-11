@@ -7,7 +7,6 @@ class Router
   route: (app) =>
     meshbluRefCacheController = new MeshbluRefCacheController { @meshbluRefCacheService }
 
-    app.get '/hello', meshbluRefCacheController.hello
-    # e.g. app.put '/resource/:id', someController.update
+    app.post '/cache', meshbluRefCacheController.create
 
 module.exports = Router

@@ -1,11 +1,15 @@
+_ = require 'lodash'
+
 class MeshbluRefCacheController
   constructor: ({@meshbluRefCacheService}) ->
     throw new Error 'Missing meshbluRefCacheService' unless @meshbluRefCacheService?
 
-  hello: (request, response) =>
-    { hasError } = request.query
-    @meshbluRefCacheService.doHello { hasError }, (error) =>
+  create: (request, response) =>
+    { key } = request.query
+    data = request.body
+    key = [ key ] unless _.isArray key
+    @meshbluRefCacheService.create { key, data }, (error) =>
       return response.sendError(error) if error?
-      response.sendStatus(200)
+      response.status(201).end()
 
 module.exports = MeshbluRefCacheController

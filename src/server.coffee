@@ -1,14 +1,21 @@
-enableDestroy      = require 'server-destroy'
-octobluExpress     = require 'express-octoblu'
-MeshbluAuth        = require 'express-meshblu-auth'
-Router             = require './router'
+enableDestroy          = require 'server-destroy'
+octobluExpress         = require 'express-octoblu'
+Router                 = require './router'
 MeshbluRefCacheService = require './services/meshblu-ref-cache-service'
+httpSignature          = require '@octoblu/connect-http-signature'
 
 class Server
   constructor: (options) ->
-    { @logFn, @disableLogging, @port } = options
-    { @meshbluConfig } = options
-    throw new Error 'Missing meshbluConfig' unless @meshbluConfig?
+    {
+      @logFn
+      @disableLogging
+      @port
+      @publicKey
+      @s3AccessKey
+      @s3SecretKey
+      @s3BucketName
+    } = options
+    throw new Error 'Missing publicKey' unless @publicKey?
 
   address: =>
     @server.address()
@@ -16,12 +23,11 @@ class Server
   run: (callback) =>
     app = octobluExpress({ @logFn, @disableLogging })
 
-    meshbluAuth = new MeshbluAuth @meshbluConfig
-    app.use meshbluAuth.auth()
-    app.use meshbluAuth.gateway()
+    app.use httpSignature.verify pub: @publicKey
+    app.use httpSignature.gateway()
 
-    meshbluRefCacheService = new MeshbluRefCacheService
-    router = new Router {@meshbluConfig, meshbluRefCacheService}
+    meshbluRefCacheService = new MeshbluRefCacheService { @s3AccessKey, @s3SecretKey, @s3BucketName }
+    router = new Router { meshbluRefCacheService }
 
     router.route app
 
