@@ -1,6 +1,6 @@
 {
   "name": "meshblu-ref-cache-service",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "meshblu-ref-cache-service an Octoblu Service",
   "keywords": [
     "Octoblu",
@@ -43,7 +43,7 @@
     "async": "^2.3.0",
     "aws-sdk": "^2.40.0",
     "coffee-script": "^1.10.0",
-    "debug": "^2.2.0",
+    "debug": "^2.6.3",
     "envalid": "^2.4.2",
     "express-meshblu-auth": "^9.0.2",
     "express-octoblu": "^3.0.0",

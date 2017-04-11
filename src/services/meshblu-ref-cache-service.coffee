@@ -4,6 +4,7 @@ aws            = require 'aws-sdk'
 s3BlobStore    = require 's3-blob-store'
 fsBlobStore    = require 'fs-blob-store'
 stringToStream = require 'string-to-stream'
+debug          = require('debug')('meshblu-ref-cache-service:meshblu-ref-cache-service')
 
 class MeshbluRefCacheService
   constructor: ({ @s3AccessKey, @s3SecretKey, @s3BucketName }) ->
@@ -23,10 +24,13 @@ class MeshbluRefCacheService
     async.each key, async.apply(@_saveBlob, data), callback
 
   _saveBlob: (data, key, callback) =>
+    debug { data, key }
     fileKey = key.replace /\./, '/'
     # clear highlight parsing error /' # WONTFIX
 
     partialData = _.get data, key
+    debug { partialData }
+    return callback() unless partialData?
     ws = @store.createWriteStream key: fileKey, callback
     stringToStream(partialData).pipe ws
 
