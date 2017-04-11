@@ -68,7 +68,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       expect(@response.statusCode).to.equal 201
 
     it 'should create a cache file', (done) ->
-      rs = @store.createReadStream key: 'some/path'
+      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path'
       streamToString rs, (error, data) =>
         return done error if error?
         expect(data).to.equal '"foo"'
@@ -105,7 +105,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       expect(@response.statusCode).to.equal 201
 
     it 'should create a cache file', (done) ->
-      rs = @store.createReadStream key: 'some/path'
+      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path'
       streamToString rs, (error, data) =>
         return done error if error?
         expect(data).to.equal '"foo"'
@@ -113,7 +113,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       return # promises
 
     it 'should create another cache file', (done) ->
-      rs = @store.createReadStream key: 'another/path'
+      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path'
       streamToString rs, (error, data) =>
         return done error if error?
         expect(data).to.equal '"bar"'

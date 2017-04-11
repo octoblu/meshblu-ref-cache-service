@@ -20,17 +20,18 @@ class MeshbluRefCacheService
         client: client
         bucket: @s3BucketName
 
-  create: ({ key, data }, callback) =>
-    async.each key, async.apply(@_saveBlob, data), callback
+  create: ({ uuid, key, data }, callback) =>
+    async.each key, async.apply(@_saveBlob, uuid, data), callback
 
-  _saveBlob: (data, key, callback) =>
+  _saveBlob: (uuid, data, key, callback) =>
     debug { data, key }
     fileKey = key.replace /\./, '/'
     # clear highlight parsing error /' # WONTFIX
+    filename = "#{uuid}/#{fileKey}"
 
     partialData = _.get data, key
     return callback() unless partialData?
-    ws = @store.createWriteStream key: fileKey, callback
+    ws = @store.createWriteStream key: filename, callback
     stringToStream(JSON.stringify(partialData)).pipe ws
 
   _createError: (message='Internal Service Error', code=500) =>
