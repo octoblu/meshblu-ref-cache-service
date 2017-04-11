@@ -29,10 +29,9 @@ class MeshbluRefCacheService
     # clear highlight parsing error /' # WONTFIX
 
     partialData = _.get data, key
-    debug { partialData }
     return callback() unless partialData?
     ws = @store.createWriteStream key: fileKey, callback
-    stringToStream(partialData).pipe ws
+    stringToStream(JSON.stringify(partialData)).pipe ws
 
   _createError: (message='Internal Service Error', code=500) =>
     error = new Error message

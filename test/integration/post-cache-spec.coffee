@@ -71,7 +71,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       rs = @store.createReadStream key: 'some/path'
       streamToString rs, (error, data) =>
         return done error if error?
-        expect(data).to.equal 'foo'
+        expect(data).to.equal '"foo"'
         done()
       return # promises
 
@@ -108,7 +108,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       rs = @store.createReadStream key: 'some/path'
       streamToString rs, (error, data) =>
         return done error if error?
-        expect(data).to.equal 'foo'
+        expect(data).to.equal '"foo"'
         done()
       return # promises
 
@@ -116,6 +116,6 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       rs = @store.createReadStream key: 'another/path'
       streamToString rs, (error, data) =>
         return done error if error?
-        expect(data).to.equal 'bar'
+        expect(data).to.equal '"bar"'
         done()
       return # promises
