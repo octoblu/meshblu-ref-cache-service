@@ -39,8 +39,9 @@ class MeshbluRefCacheService
     else
       partialData = _.get data, key
     return callback() unless partialData?
-    ws = @store.createWriteStream key: filename, callback
-    stringToStream(JSON.stringify(partialData)).pipe ws
+    @store.remove filename, =>
+      ws = @store.createWriteStream key: filename, callback
+      stringToStream(JSON.stringify(partialData)).pipe ws
 
   _createError: (message='Internal Service Error', code=500) =>
     error = new Error message
