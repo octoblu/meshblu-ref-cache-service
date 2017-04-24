@@ -26,7 +26,10 @@ class MeshbluRefCacheService
   get: ({ uuid, path }, callback) =>
     path = '/_' if _.isEmpty path
     filename = "#{uuid}#{path}"
-    callback null, @store.createReadStream key: filename
+    stream = @store.createReadStream key: filename
+    stream.on 'error', (error) =>
+      console.error 'get', error.stack
+    callback null, stream
 
   _saveBlob: (uuid, data, key, callback) =>
     debug { data, key }
@@ -41,6 +44,9 @@ class MeshbluRefCacheService
     return callback() unless partialData?
     @store.remove filename, =>
       ws = @store.createWriteStream key: filename, callback
+      ws.on 'error', (error) =>
+        console.error
+        console.error '_saveBlob', error.stack
       stringToStream(JSON.stringify(partialData)).pipe ws
 
   _createError: (message='Internal Service Error', code=500) =>
