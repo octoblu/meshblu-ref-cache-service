@@ -24,14 +24,17 @@ class MeshbluRefCacheService
     async.each key, async.apply(@_saveBlob, uuid, data), callback
 
   get: ({ uuid, path }, callback) =>
+    callback = _.once callback
     path = '/_' if _.isEmpty path
     filename = "#{uuid}#{path}"
     stream = @store.createReadStream key: filename
     stream.on 'error', (error) =>
       console.error 'get', error.stack
+      callback error
     callback null, stream
 
   _saveBlob: (uuid, data, key, callback) =>
+    callback = _.once callback
     debug { data, key }
     fileKey = key.replace /\./, '/'
     # clear highlight parsing error /' # WONTFIX
@@ -45,8 +48,8 @@ class MeshbluRefCacheService
     @store.remove filename, =>
       ws = @store.createWriteStream key: filename, callback
       ws.on 'error', (error) =>
-        console.error
         console.error '_saveBlob', error.stack
+        callback error
       stringToStream(JSON.stringify(partialData)).pipe ws
 
   _createError: (message='Internal Service Error', code=500) =>
