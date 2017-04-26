@@ -77,7 +77,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
     it 'should get the cache file', ->
       expect(@body).to.equal 'foo'
 
-  describe.only 'getting the whole device', ->
+  describe 'getting the whole device', ->
     beforeEach (done) ->
       @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
 
@@ -110,3 +110,19 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
     it 'should get the cache file', ->
       expect(@body).to.deep.equal some: path: 'foo'
+
+  describe 'when device does not exist', ->
+    beforeEach (done) ->
+      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
+
+    beforeEach (done) ->
+      options =
+        baseUrl: "http://localhost:#{@serverPort}"
+        uri: '/cache/87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1'
+        json: true
+
+      request.get options, (error, @response, @body) =>
+        done error
+
+    it 'should return a 404', ->
+      expect(@response.statusCode).to.equal 404

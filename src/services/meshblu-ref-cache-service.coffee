@@ -24,13 +24,9 @@ class MeshbluRefCacheService
     async.each key, async.apply(@_saveBlob, uuid, data), callback
 
   get: ({ uuid, path }, callback) =>
-    callback = _.once callback
     path = '/_' if _.isEmpty path
     filename = "#{uuid}#{path}"
     stream = @store.createReadStream key: filename
-    stream.on 'error', (error) =>
-      console.error 'get', error.stack
-      callback error
     callback null, stream
 
   _saveBlob: (uuid, data, key, callback) =>
