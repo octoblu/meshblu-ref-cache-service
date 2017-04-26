@@ -20,8 +20,7 @@ class MeshbluRefCacheController
       return response.sendError(error) if error?
       stream.once 'error', (error) =>
         error.code = 404 if error.code == 'ENOENT'
-        error.code = 404 if error.code == 'NoSuchKey:'
-        console.error "Code: ", error.code, "Message:", error.message
+        error.code = 404 if error.code == 'NoSuchKey'
         return response.sendError(error) if error?
       stream.pipe(response)
 
