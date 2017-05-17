@@ -5,10 +5,9 @@ FetchPublicKey = require 'fetch-meshblu-public-key'
 
 envConfig = {
   PORT: envalid.num({ default: 80, devDefault: 3000 })
-  S3_ACCESS_KEY: envalid.str()
-  S3_SECRET_KEY: envalid.str()
-  S3_BUCKET_NAME: envalid.str()
   MESHBLU_PUBLIC_KEY_URI: envalid.str()
+  REDIS_URL: envalid.str()
+  NAMESPACE: envalid.str()
 }
 
 class Command
@@ -16,9 +15,8 @@ class Command
     env = envalid.cleanEnv process.env, envConfig
     @serverOptions = {
       port          : env.PORT
-      s3AccessKey   : env.S3_ACCESS_KEY
-      s3SecretKey   : env.S3_SECRET_KEY
-      s3BucketName  : env.S3_BUCKET_NAME
+      redisUrl      : env.REDIS_URL
+      namespace     : env.NAMESPACE
       publicKeyUri  : env.MESHBLU_PUBLIC_KEY_URI
     }
 

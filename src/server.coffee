@@ -10,11 +10,12 @@ class Server
       @disableLogging
       @port
       @publicKey
-      @s3AccessKey
-      @s3SecretKey
-      @s3BucketName
+      @redisUri
+      @namespace
     } = options
     throw new Error 'Missing publicKey' unless @publicKey?
+    throw new Error 'Missing redisUri' unless @redisUri?
+    throw new Error 'Missing namespace' unless @namespace?
 
   address: =>
     @server.address()
@@ -22,7 +23,7 @@ class Server
   run: (callback) =>
     app = octobluExpress({ @logFn, @disableLogging })
 
-    meshbluRefCacheService = new MeshbluRefCacheService { @s3AccessKey, @s3SecretKey, @s3BucketName }
+    meshbluRefCacheService = new MeshbluRefCacheService { @redisUri, @namespace }
     router = new Router { meshbluRefCacheService, @publicKey }
 
     router.route app

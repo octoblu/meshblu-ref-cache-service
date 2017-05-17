@@ -1,11 +1,13 @@
 {beforeEach, afterEach, describe, it} = global
+
 {expect}      = require 'chai'
 sinon         = require 'sinon'
 request       = require 'request'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
-fsBlobStore   = require 'fs-blob-store'
-streamToString = require 'stream-to-string'
+Redis         = require 'ioredis'
+RedisNS       = require '@octoblu/redis-ns'
+UUID          = require 'uuid'
 
 describe 'POST /cache', ->
   beforeEach ->
@@ -24,12 +26,17 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 -----END RSA PRIVATE KEY-----'''
 
   beforeEach (done) ->
+    @namespace = "test:ref-cache:#{UUID.v4()}"
+    @redisUri = 'localhost'
     @logFn = sinon.spy()
-    serverOptions =
+    serverOptions = {
       port: undefined
       disableLogging: true
-      logFn: @logFn
-      publicKey: @publicKey
+      @logFn
+      @publicKey
+      @redisUri
+      @namespace
+    }
 
     @server = new Server serverOptions
 
@@ -37,15 +44,17 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       @serverPort = @server.address().port
       done()
 
-  beforeEach ->
-    @store = fsBlobStore './test/tmp'
+  beforeEach (done) ->
+    @client = new RedisNS @namespace, new Redis @redisUri, dropBufferSupport: true
+    @client.on 'ready', done
 
   afterEach ->
     @server.destroy()
 
   describe 'posting a single key', ->
     beforeEach (done) ->
-      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
+      @client.del '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
+      return
 
     beforeEach (done) ->
       options =
@@ -67,9 +76,8 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
     it 'should return a 201', ->
       expect(@response.statusCode).to.equal 201
 
-    it 'should create a cache file', (done) ->
-      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path'
-      streamToString rs, (error, data) =>
+    it 'should create a cache entry', (done) ->
+      @client.get '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', (error, data) =>
         return done error if error?
         expect(data).to.equal '"foo"'
         done()
@@ -77,7 +85,8 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
   describe 'caching the whole device', ->
     beforeEach (done) ->
-      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
+      @client.del '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', done
+      return
 
     beforeEach (done) ->
       options =
@@ -100,8 +109,7 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
       expect(@response.statusCode).to.equal 201
 
     it 'should create a cache file', (done) ->
-      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_'
-      streamToString rs, (error, data) =>
+      @client.get '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/_', (error, data) =>
         return done error if error?
         expect(JSON.parse data).to.deep.equal some: path: 'foo'
         done()
@@ -109,10 +117,12 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
 
   describe 'posting two keys', ->
     beforeEach (done) ->
-      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
+      @client.del '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', done
+      return
 
     beforeEach (done) ->
-      @store.remove '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path', done
+      @client.del '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path', done
+      return
 
     beforeEach (done) ->
       options =
@@ -136,17 +146,15 @@ keYaKc587IGMob72txxUbtNLXfQoU2o4+262ojUd
     it 'should return a 201', ->
       expect(@response.statusCode).to.equal 201
 
-    it 'should create a cache file', (done) ->
-      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path'
-      streamToString rs, (error, data) =>
+    it 'should create a cache entry', (done) ->
+      @client.get '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/some/path', (error, data) =>
         return done error if error?
         expect(data).to.equal '"foo"'
         done()
       return # promises
 
     it 'should create another cache file', (done) ->
-      rs = @store.createReadStream key: '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path'
-      streamToString rs, (error, data) =>
+      @client.get '87c32ca0-ae2b-4983-bcd4-9ce5500fe3c1/another/path', (error, data) =>
         return done error if error?
         expect(data).to.equal '"bar"'
         done()

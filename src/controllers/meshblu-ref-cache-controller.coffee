@@ -16,15 +16,8 @@ class MeshbluRefCacheController
   get: (request, response) =>
     { uuid } = request.params
     path = request.path.replace("/cache/#{uuid}", '')
-    @meshbluRefCacheService.get { uuid, path }, (error, stream) =>
+    @meshbluRefCacheService.get { uuid, path }, (error, data) =>
       return response.sendError(error) if error?
-      stream.once 'error', (error) =>
-        error.code = 404 if error.code == 'ENOENT'
-        error.code = 404 if error.code == 'NoSuchKey'
-        return response.sendError(error) if error?
-      try
-        stream.pipe(response)
-      catch error
-        console.error error.stack
+      response.send(data)
 
 module.exports = MeshbluRefCacheController
