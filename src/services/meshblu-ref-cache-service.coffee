@@ -8,7 +8,7 @@ Redis       = require 'ioredis'
 
 class MeshbluRefCacheService
   constructor: ({ @redisUri, @namespace }) ->
-    @maxConnections = 2
+    @maxConnections = 10
     @minConnections = 1
     @idleTimeoutMillis ?= 60000
     @redisPool = @_createRedisPool { @maxConnections, @minConnections, @idleTimeoutMillis, @namespace, @redisUri }
