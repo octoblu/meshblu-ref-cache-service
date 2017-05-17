@@ -22,6 +22,9 @@ class MeshbluRefCacheController
         error.code = 404 if error.code == 'ENOENT'
         error.code = 404 if error.code == 'NoSuchKey'
         return response.sendError(error) if error?
-      stream.pipe(response)
+      try
+        stream.pipe(response)
+      catch error
+        console.error error.stack
 
 module.exports = MeshbluRefCacheController
