@@ -6,7 +6,7 @@ FetchPublicKey = require 'fetch-meshblu-public-key'
 envConfig = {
   PORT: envalid.num({ default: 80, devDefault: 3000 })
   MESHBLU_PUBLIC_KEY_URI: envalid.str()
-  REDIS_URL: envalid.str()
+  REDIS_URI: envalid.str()
   NAMESPACE: envalid.str()
 }
 
@@ -15,7 +15,7 @@ class Command
     env = envalid.cleanEnv process.env, envConfig
     @serverOptions = {
       port          : env.PORT
-      redisUrl      : env.REDIS_URL
+      redisUri      : env.REDIS_URI
       namespace     : env.NAMESPACE
       publicKeyUri  : env.MESHBLU_PUBLIC_KEY_URI
     }
